@@ -7,21 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-type ChatMessage = {
-  id: string;
-  user: string;
-  message: string;
-  timestamp?: string;
-  isSystem?: boolean;
-};
-
-type ChatBoxProps = {
-  messages: ChatMessage[];
-  onSend?: (message: string) => void;
-  currentUser?: string;
-};
-
-export function ChatBox({ messages, onSend, currentUser = 'You' }: ChatBoxProps) {
+export function ChatBox({ messages, onSend, currentUserId }: ChatBoxProps) {
   const [text, setText] = React.useState('');
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -40,12 +26,15 @@ export function ChatBox({ messages, onSend, currentUser = 'You' }: ChatBoxProps)
       <CardContent className="flex-1 min-h-0 flex flex-col gap-3 pt-3">
         <ScrollArea className="flex-1 min-h-0 pr-3">
           <div className="space-y-3 mt-3">
-            {messages.map((m) => {
-              const isMe = m.user === currentUser;
+            {messages.map((m, index) => {
+              const isMe = m.uid === currentUserId;
 
               if (m.isSystem) {
                 return (
-                  <div key={m.id} className="text-center text-xs text-muted-foreground">
+                  <div
+                    key={`${m.uid}-${index}`}
+                    className="text-center text-xs text-muted-foreground"
+                  >
                     <span className="border p-2 rounded-lg text-primary font-bold">
                       {m.message}
                     </span>
@@ -55,7 +44,7 @@ export function ChatBox({ messages, onSend, currentUser = 'You' }: ChatBoxProps)
 
               return (
                 <div
-                  key={m.id}
+                  key={`${m.uid}-${index}`}
                   className={cn('flex gap-2', isMe ? 'justify-end' : 'justify-start')}
                 >
                   {!isMe && (

@@ -7,16 +7,36 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Gavel, User, Settings } from 'lucide-react';
 import { AdminSettings } from '@/components/AdminSettings';
+import { useRouter } from 'next/navigation';
+import { URL } from '@/utils/Constants';
 
 export default function Page() {
   const [name, setName] = useState('');
   const [settings, setSettings] = useState<any>(null);
+  const router = useRouter();
 
-  const handleCreate = () => {
-    console.log({
-      hostName: name,
-      auctionSettings: settings,
+  const handleCreate = async () => {
+    const res = await fetch(`${URL}/create-room`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hostName: name,
+        auctionSettings: settings,
+      }),
     });
+
+    const data = await res.json();
+
+    localStorage.setItem(
+      'auction_admin',
+      JSON.stringify({
+        roomId: data.roomId,
+        adminKey: data.adminKey,
+        name,
+      }),
+    );
+
+    router.push(`/room/${data.roomId}`);
   };
 
   return (
@@ -34,15 +54,10 @@ export default function Page() {
 
         <CardContent className="space-y-8">
           <div className="space-y-2">
-            <Label htmlFor="name">Your Name</Label>
+            <Label>Your Name</Label>
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-muted-foreground" />
-              <Input
-                id="name"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
           </div>
 
