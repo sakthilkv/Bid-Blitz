@@ -4,6 +4,7 @@ import { useState } from 'react';
 import StatusBar from '@/components/StatusBar';
 import JoiningPhase from '@/pages/JoiningPhase';
 import TeamAuction from '@/pages/TeamAuction';
+import PlayerAuction from '@/pages/PlayerAuction';
 
 // mock socket for now
 const socket = {
@@ -40,7 +41,9 @@ export default function Page() {
     <div>
       <div className="bg-background h-screen">
         <span>
+          <JoiningPhase />
           <TeamAuction />
+          <PlayerAuction />
         </span>
       </div>
     </div>

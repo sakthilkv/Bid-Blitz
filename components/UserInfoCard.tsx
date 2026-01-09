@@ -11,7 +11,7 @@ type Props = {
 
 export function UserInfoCard({ name, pfp, wallet }: Props) {
   return (
-    <Card>
+    <Card className='h-full'>
       <CardHeader className="flex flex-row items-center gap-3">
         <Avatar>
           <AvatarImage src={pfp} />

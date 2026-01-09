@@ -9,8 +9,10 @@ import { UserInfoCard } from '@/components/UserInfoCard';
 import { TeamAuctionHeader } from '@/components/TeamAuctionHeader';
 import { AuctionPhaseHeader } from '@/components/AuctionPhaseHeader';
 import { TeamsTable } from '@/components/TeamsTable';
+import { PlayerAuctionHeader } from '@/components/PlayerAuctionHeader';
+import { PlayersTable } from '@/components/PlayersTable';
 
-export default function TeamAuction() {
+export default function PlayerAuction() {
   const [messages, setMessages] = useState<any[]>([]);
 
   useEffect(() => {
@@ -41,46 +43,68 @@ export default function TeamAuction() {
   return (
     <div className="flex h-full min-h-screen gap-4 p-20">
       <div className="flex flex-col flex-1 gap-4 min-h-0">
-        <TeamsTable
-          teams={[
+        <PlayersTable
+          players={[
             {
-              id: 'rcb',
-              name: 'Royal Challengers Bangalore',
+              id: '1',
+              name: 'Virat Kohli',
+              role: 'Batsman',
+              status: 'sold',
+              price: 150,
+              team: 'RCB',
+            },
+            {
+              id: '2',
+              name: 'MS Dhoni',
+              role: 'Wicket Keeper',
               status: 'sold',
               price: 120,
-              boughtBy: 'Team CSK',
+              team: 'CSK',
             },
-            { id: 'mi', name: 'Mumbai Indians', status: 'available' },
             {
-              id: 'csk',
-              name: 'Chennai Super Kings',
-              status: 'sold',
-              price: 130,
-              boughtBy: 'Team DC',
+              id: '3',
+              name: 'KL Rahul',
+              role: 'Batsman',
+              status: 'unsold',
             },
-            { id: 'dc', name: 'Delhi Capitals', status: 'available' },
             {
-              id: 'kkr',
-              name: 'Kolkata Knight Riders',
+              id: '4',
+              name: 'Jasprit Bumrah',
+              role: 'Bowler',
               status: 'sold',
-              price: 110,
-              boughtBy: 'Team SRH',
+              price: 140,
+              team: 'MI',
             },
-            { id: 'srh', name: 'Sunrisers Hyderabad', status: 'available' },
             {
-              id: 'rr',
-              name: 'Rajasthan Royals',
+              id: '1',
+              name: 'Virat Kohli',
+              role: 'Batsman',
               status: 'sold',
-              price: 115,
-              boughtBy: 'Team RCB',
+              price: 150,
+              team: 'RCB',
             },
-            { id: 'pk', name: 'Punjab Kings', status: 'available' },
-            { id: 'gt', name: 'Gujarat Titans', status: 'sold', price: 125, boughtBy: 'Team MI' },
-            { id: 'lsg', name: 'Lucknow Super Giants', status: 'available' },
-            { id: 'kca', name: 'Kerala Kings Alliance', status: 'available' },
-            { id: 'mfa', name: 'Mumbai Fire Angels', status: 'available' },
-            { id: 'hyd', name: 'Hyderabad Hawks', status: 'available' },
-            { id: 'ban', name: 'Bangalore Blasters', status: 'available' },
+            {
+              id: '2',
+              name: 'MS Dhoni',
+              role: 'Wicket Keeper',
+              status: 'sold',
+              price: 120,
+              team: 'CSK',
+            },
+            {
+              id: '3',
+              name: 'KL Rahul',
+              role: 'Batsman',
+              status: 'unsold',
+            },
+            {
+              id: '4',
+              name: 'Jasprit Bumrah',
+              role: 'Bowler',
+              status: 'sold',
+              price: 140,
+              team: 'MI',
+            },
           ]}
         />
       </div>
@@ -93,29 +117,21 @@ export default function TeamAuction() {
 
           <div className="flex-1">
             <AuctionPhaseHeader
-              phaseName={'Team Auction'}
-              currentPhase={0}
-              totalPhases={0}
+              phaseName={'Player Auction'}
+              currentPhase={2}
+              totalPhases={2}
               teamsRemaining={0}
             />
           </div>
         </div>
-
-        <TeamAuctionHeader
-          teamName="Royal Challengers Bangalore"
-          timeLeft={15}
-          totalTime={20}
-          round={3}
+        <PlayerAuctionHeader
+          playerName="Virat Kohli"
+          basePrice={20}
+          bidIncrement={5}
+          timeLeft={60}
+          status="bidding"
         />
-        <div className="flex w-full gap-4">
-            <div className="flex-1">
-            <BidPanel
-              maxBid={120}
-              onBidSubmit={() => handleLog('A bid was placed secretly')}
-              onAuctionEnd={(winner, amount) => handleLog(`${winner} won the team for ₹${amount}L`)}
-            />
-          </div>
-        </div>
+
         <div className="flex-1 min-h-0" />
       </div>
 

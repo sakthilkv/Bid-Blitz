@@ -34,11 +34,13 @@ export function BidPanel({ maxBid, onBidSubmit, onAuctionEnd }: Props) {
         </div>
 
         <div className="flex justify-between">
-          <Button variant="secondary" onClick={() => bid && onBidSubmit(bid)}>
-            Submit Bid
+          <Button
+            variant={'destructive'}
+            onClick={() => onAuctionEnd('Team CSK', Number(bid || 0))}
+          >
+            End Auction
           </Button>
-
-          <Button onClick={() => onAuctionEnd('Team CSK', Number(bid || 0))}>End Auction</Button>
+          <Button onClick={() => bid && onBidSubmit(bid)}>Submit Bid</Button>
         </div>
       </CardContent>
     </Card>
