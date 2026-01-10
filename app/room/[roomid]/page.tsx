@@ -6,6 +6,7 @@ import JoiningPhase from '@/pages/JoiningPhase';
 import JoinAuctionDialog from '@/components/JoinAuctionDialog';
 import { generateUUID } from '@/utils/Utils';
 import { URL } from '@/utils/Constants';
+import TeamAuction from '@/pages/TeamAuction';
 
 export default function RoomPage() {
   const [player, setPlayer] = useState<{
@@ -13,6 +14,7 @@ export default function RoomPage() {
     uid: string;
     avatar: string;
   } | null>(null);
+  const [roomState, setRoomState] = useState<RoomStateProps | null>(null);
 
   const [roomId, setRoomId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -38,7 +40,12 @@ export default function RoomPage() {
     socketRef.current = socket;
 
     socket.on('STATE', (state) => {
-      if (state.players) setParticipants(state.players);
+      if (state) setRoomState(state);
+      console.log(state);
+      if (state.players) {
+        const participants: Participant[] = Object.values(state.players);
+        setParticipants(participants);
+      }
       if (state.settings) setSettings(state.settings);
       if (state.phase) setPhase(state.phase);
     });
@@ -133,24 +140,59 @@ export default function RoomPage() {
     return <JoinAuctionDialog onJoin={handleJoin} triggerButton={false} />;
   }
 
-  return (
-    <JoiningPhase
-      roomUrl={roomUrl}
-      playerID={player.uid}
-      messages={messages}
-      participants={participants}
-      settings={settings}
-      onSendMessage={handleSendMessage}
-      onSettingsChange={(newSettings) => {
-        setSettings(newSettings);
-        if (socketRef.current && roomId) {
-          socketRef.current.emit('ACTION', {
-            type: 'CHANGE_SETTINGS',
-            payload: { roomId, ...newSettings },
-          });
-        }
-      }}
-      onStart={startAuction}
-    />
-  );
+  if (phase === 1) {
+    return (
+      <JoiningPhase
+        roomUrl={roomUrl}
+        playerID={player.uid}
+        messages={messages}
+        participants={participants}
+        settings={settings}
+        onSendMessage={handleSendMessage}
+        onSettingsChange={(newSettings) => {
+          setSettings(newSettings);
+          if (socketRef.current && roomId) {
+            socketRef.current.emit('ACTION', {
+              type: 'CHANGE_SETTINGS',
+              payload: { roomId, ...newSettings },
+            });
+          }
+        }}
+        onStart={startAuction}
+      />
+    );
+  }
+
+  if (phase === 2 && roomState && player) {
+    const serverPlayer = roomState.players[player.uid];
+    if (!serverPlayer) return null;
+    console.log(roomState.teamAuction.teams[roomState.teamAuction.currentTeamId].name);
+    return (
+      <TeamAuction
+        phase={roomState.phase}
+        playerID={player.uid}
+        userInfo={{
+          playerId: serverPlayer.uid,
+          name: serverPlayer.name,
+          avatar: serverPlayer.avatar,
+          wallet: serverPlayer.wallet ?? 0,
+        }}
+        onSendMessage={handleSendMessage}
+        messages={messages}
+        teams={[]}
+        currentTeam={{
+          teamName: roomState.teamAuction.teams[roomState.teamAuction.currentTeamId].name,
+          timeLeft: roomState.timer.currentTime,
+          totalTime: roomState.settings.timePerPlayer,
+          status: 'bidding',
+          round: undefined,
+        }}
+        onSendBid={function (bid: number): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
+  }
+
+  return null;
 }

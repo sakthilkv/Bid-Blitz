@@ -6,30 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Timer, Gavel } from 'lucide-react';
 
-type Props = {
-  teamName: string;
-  timeLeft: number;
-  totalTime?: number;
-  status?: 'bidding' | 'ended';
-  round?: number;
-};
-
 export function TeamAuctionHeader({
   teamName,
   timeLeft,
   totalTime = timeLeft,
   status = 'bidding',
   round,
-}: Props) {
-  const [remaining, setRemaining] = useState(timeLeft);
+}: TeamAuctionHeaderProps) {
+  const remaining = timeLeft;
 
-  useEffect(() => {
-    if (remaining <= 0) return;
-    const t = setInterval(() => setRemaining((r) => r - 1), 1000);
-    return () => clearInterval(t);
-  }, [remaining]);
-
-  const progress = (remaining / totalTime) * 100;
+  const progress = ( remaining  / totalTime) * 100;
 
   return (
     <Card>

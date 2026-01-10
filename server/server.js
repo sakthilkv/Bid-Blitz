@@ -3,7 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const crypto = require('crypto');
-
+const { baseTeams, extraTeams } = require('./data');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -36,9 +36,18 @@ app.post('/create-room', (req, res) => {
     host: hostName,
     settings: auctionSettings,
     status: 'waiting',
-    currentBid: auctionSettings.defaultBid,
-    players: [],
+    players: {},
     phase: 1,
+    timer: {
+      isActive: false,
+      currentTime: 0,
+    },
+    teamAuction: {
+      teams: {},
+      currentTeamId: 'CSK',
+      highestBid: 0,
+      highestBidderId: '',
+    },
   };
 
   rooms.set(roomId, state);
@@ -62,13 +71,18 @@ io.on('connection', (socket) => {
       socket.data.roomId = roomId;
       socket.data.player = playerData;
 
-      const exists = room.players.find((p) => p.uid === playerData.uid);
-      if (!exists) {
-        room.players.push({
+      if (!room.players[playerData.uid]) {
+        room.players[playerData.uid] = {
           ...playerData,
+          team: {
+            name: '',
+            price: '',
+          },
+          purchased: [],
+          wallet: room.settings.totalPurse,
           isHost: false,
           status: 'joined',
-        });
+        };
       }
 
       socket.emit('STATE', room);
@@ -85,7 +99,7 @@ io.on('connection', (socket) => {
 
       if (roomLock.get(roomId) !== adminKey) return;
 
-      const player = room.players.find((p) => p.uid === playerId);
+      const player = room.players[playerId];
       if (!player) return;
 
       room.adminPlayerId = playerId;
@@ -114,13 +128,60 @@ io.on('connection', (socket) => {
 
     if (type === 'START_AUCTION') {
       const { roomId, ...adminData } = payload;
-
       const room = rooms.get(roomId);
       if (!room) return;
+
       if (roomLock.get(roomId) === adminData.adminKey) {
         console.log('Room Unlocked');
         room.phase = 2;
+
+        // Initialize teams based on mode
+        const mode = room.settings.teamsMode;
+        if (mode === '10') {
+          room.teamAuction.teams = Object.fromEntries(Object.entries(baseTeams).slice(0, 10));
+        } else if (mode === '14') {
+          room.teamAuction.teams = { ...baseTeams, ...extraTeams };
+        }
+
+        // Prepare for auction
+        const teamIds = Object.keys(room.teamAuction.teams);
+        let currentTeamIndex = 0;
+        room.teamAuction.currentTeamId = teamIds[currentTeamIndex];
+        room.timer.currentTime = room.settings.timePerPlayer;
+        room.timer.isActive = true;
+
+        io.to(roomId).emit('STATE', room);
+
+        // Start interval for silent auction
+        const auctionInterval = setInterval(() => {
+          // Decrease timer
+          room.timer.currentTime -= 1;
+
+          // Emit updated state every second
+          io.to(roomId).emit('STATE', room);
+
+          // Timer ended
+          if (room.timer.currentTime <= 0) {
+            // Reset highest bid info
+            room.teamAuction.highestBid = 0;
+            room.teamAuction.highestBidderId = '';
+
+            // Move to next team
+            currentTeamIndex += 1;
+            if (currentTeamIndex < teamIds.length) {
+              room.teamAuction.currentTeamId = teamIds[currentTeamIndex];
+              room.timer.currentTime = room.settings.timePerPlayer;
+            } else {
+              // All teams done, stop auction
+              clearInterval(auctionInterval);
+              room.timer.isActive = false;
+              console.log('Team auction ended');
+            }
+          }
+        }, 1000); // every second
       }
+
+      io.to(roomId).emit('STATE', room);
     }
   });
 
@@ -129,7 +190,7 @@ io.on('connection', (socket) => {
     if (roomId && player) {
       const room = rooms.get(roomId);
       if (room) {
-        room.players = room.players.filter((p) => p.uid !== player.uid);
+        delete room.players[player.uid];
         io.to(roomId).emit('STATE', room);
       }
     }
