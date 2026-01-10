@@ -1,6 +1,7 @@
 type Participant = {
   uid: string;
   name: string;
+  avatar: string;
   status: 'joined' | 'ready';
   isHost?: boolean;
 };
@@ -12,6 +13,7 @@ type ParticipantsListProps = {
 type ChatMessage = {
   uid: string;
   user: string;
+  avatar: string;
   message: string;
   timestamp?: string;
   isSystem?: boolean;

@@ -10,6 +10,7 @@ import { URL } from '@/utils/Constants';
 export default function RoomPage() {
   const [userName, setUserName] = useState<string | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -19,7 +20,7 @@ export default function RoomPage() {
     totalPurse: 100,
     timePerPlayer: 0,
   });
-
+  const [phase, setPhase] = useState<number>(1);
   const [roomUrl, setRoomUrl] = useState('');
   const socketRef = useRef<Socket | null>(null);
 
@@ -36,6 +37,7 @@ export default function RoomPage() {
     socket.on('STATE', (state) => {
       if (state.players) setParticipants(state.players);
       if (state.settings) setSettings(state.settings);
+      if (state.phase) setPhase(state.phase);
     });
 
     socket.on('RECEIVE_MESSAGE', (message) => {
@@ -57,6 +59,7 @@ export default function RoomPage() {
       const player = JSON.parse(stored);
       setUserName(player.name);
       setPlayerId(player.uid);
+      setAvatar(player.avatar);
     }
   }, []);
 
@@ -65,7 +68,7 @@ export default function RoomPage() {
 
     socketRef.current.emit('ACTION', {
       type: 'JOIN_ROOM',
-      payload: { roomId, name: userName, uid: playerId },
+      payload: { roomId, name: userName, avatar, uid: playerId },
     });
 
     const raw = localStorage.getItem('auction_admin');
@@ -80,13 +83,14 @@ export default function RoomPage() {
         roomId,
         adminKey: adminData.adminKey,
         playerId,
+        avatar,
       },
     });
-  }, [userName, playerId, roomId]);
+  }, [userName, playerId, roomId, avatar]);
 
-  const handleJoin = (name: string) => {
+  const handleJoin = (name: string, avatar: string) => {
     const uid = generateUUID();
-    const playerData = { name, uid };
+    const playerData = { name, uid, avatar };
     localStorage.setItem('PlayerData', JSON.stringify(playerData));
 
     setUserName(name);
@@ -103,6 +107,7 @@ export default function RoomPage() {
         message: text,
         user: userName,
         uid: playerId,
+        avatar,
         timestamp: new Date().toLocaleTimeString(),
       },
     });

@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
       socket.emit('STATE', room);
 
       socket.to(roomId).emit('STATE', room);
-      console.log('JOIN ROOM');
+      console.log(room);
     }
 
     if (type === 'CLAIM_ADMIN') {
@@ -117,7 +117,10 @@ io.on('connection', (socket) => {
 
       const room = rooms.get(roomId);
       if (!room) return;
-      if (roomLock.get(roomId) === adminData.adminKey) console.log('Room Unlocked');
+      if (roomLock.get(roomId) === adminData.adminKey) {
+        console.log('Room Unlocked');
+        room.phase = 2;
+      }
     }
   });
 

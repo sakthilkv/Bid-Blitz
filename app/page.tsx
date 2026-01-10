@@ -84,6 +84,14 @@ export default function Page() {
           >
             Create Room
           </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              localStorage.clear(); 
+            }}
+          >
+            Clear Player Data
+          </Button>
         </CardContent>
       </Card>
     </div>

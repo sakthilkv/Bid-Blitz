@@ -29,8 +29,7 @@ export function ParticipantsList({ participants }: ParticipantsListProps) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {p.isHost && <Badge variant="secondary">Host</Badge>}
-                  <Badge variant={p.status === 'ready' ? 'default' : 'outline'}>{p.status}</Badge>
+                  {p.isHost && <Badge variant="default">Host</Badge>}
                 </div>
               </div>
             ))}

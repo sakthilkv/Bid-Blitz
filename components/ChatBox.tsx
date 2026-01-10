@@ -48,8 +48,8 @@ export function ChatBox({ messages, onSend, currentUserId }: ChatBoxProps) {
                   className={cn('flex gap-2', isMe ? 'justify-end' : 'justify-start')}
                 >
                   {!isMe && (
-                    <Avatar className="h-7 w-7">
-                      <AvatarFallback>{m.user.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <Avatar>
+                      <AvatarFallback className="text-xl">{m.avatar}</AvatarFallback>
                     </Avatar>
                   )}
 
