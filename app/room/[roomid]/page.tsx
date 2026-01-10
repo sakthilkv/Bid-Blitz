@@ -8,9 +8,12 @@ import { generateUUID } from '@/utils/Utils';
 import { URL } from '@/utils/Constants';
 
 export default function RoomPage() {
-  const [userName, setUserName] = useState<string | null>(null);
-  const [playerId, setPlayerId] = useState<string | null>(null);
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [player, setPlayer] = useState<{
+    name: string;
+    uid: string;
+    avatar: string;
+  } | null>(null);
+
   const [roomId, setRoomId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -55,20 +58,20 @@ export default function RoomPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem('PlayerData');
-    if (stored) {
-      const player = JSON.parse(stored);
-      setUserName(player.name);
-      setPlayerId(player.uid);
-      setAvatar(player.avatar);
-    }
+    if (stored) setPlayer(JSON.parse(stored));
   }, []);
 
   useEffect(() => {
-    if (!socketRef.current || !userName || !playerId || !roomId) return;
+    if (!socketRef.current || !player || !roomId) return;
 
     socketRef.current.emit('ACTION', {
       type: 'JOIN_ROOM',
-      payload: { roomId, name: userName, avatar, uid: playerId },
+      payload: {
+        roomId,
+        name: player.name,
+        uid: player.uid,
+        avatar: player.avatar,
+      },
     });
 
     const raw = localStorage.getItem('auction_admin');
@@ -82,32 +85,30 @@ export default function RoomPage() {
       payload: {
         roomId,
         adminKey: adminData.adminKey,
-        playerId,
-        avatar,
+        playerId: player.uid,
+        avatar: player.avatar,
       },
     });
-  }, [userName, playerId, roomId, avatar]);
+  }, [player, roomId]);
 
   const handleJoin = (name: string, avatar: string) => {
     const uid = generateUUID();
-    const playerData = { name, uid, avatar };
-    localStorage.setItem('PlayerData', JSON.stringify(playerData));
-
-    setUserName(name);
-    setPlayerId(uid);
+    const data = { name, uid, avatar };
+    localStorage.setItem('PlayerData', JSON.stringify(data));
+    setPlayer(data);
   };
 
   const handleSendMessage = (text: string) => {
-    if (!playerId || !socketRef.current || !roomId) return;
+    if (!player || !socketRef.current || !roomId) return;
 
     socketRef.current.emit('ACTION', {
       type: 'SEND_MESSAGE',
       payload: {
         roomId,
         message: text,
-        user: userName,
-        uid: playerId,
-        avatar,
+        user: player.name,
+        uid: player.uid,
+        avatar: player.avatar,
         timestamp: new Date().toLocaleTimeString(),
       },
     });
@@ -128,14 +129,14 @@ export default function RoomPage() {
     });
   }
 
-  if (!userName) {
+  if (!player) {
     return <JoinAuctionDialog onJoin={handleJoin} triggerButton={false} />;
   }
 
   return (
     <JoiningPhase
       roomUrl={roomUrl}
-      playerID={playerId!}
+      playerID={player.uid}
       messages={messages}
       participants={participants}
       settings={settings}
