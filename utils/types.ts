@@ -31,4 +31,5 @@ type JoiningPhaseProps = {
   settings: any;
   onSendMessage: (text: string) => void;
   onSettingsChange: (settings: any) => void;
+  onStart: () => void;
 };

@@ -4,6 +4,8 @@ import { ChatBox } from '@/components/ChatBox';
 import { ParticipantsList } from '@/components/ParticipantsList';
 import { RoomInfo } from '@/components/RoomInfo';
 import { AdminSettings } from '@/components/AdminSettings';
+import { Button } from '@/components/ui/button';
+import { Play } from 'lucide-react';
 
 export default function JoiningPhase({
   roomUrl,
@@ -13,16 +15,21 @@ export default function JoiningPhase({
   settings,
   onSendMessage,
   onSettingsChange,
+  onStart,
 }: JoiningPhaseProps) {
   return (
     <div className="flex h-screen gap-4 p-16">
-      <div className="flex flex-col flex-[2] gap-4 min-h-0">
-        <div className="flex gap-4 flex-shrink-0">
-          <div className="flex-1">
+      <div className="flex flex-col flex-2 gap-4 min-h-0">
+        <div className="flex gap-4 shrink-0">
+          <div className="flex-1 flex flex-col gap-5  h-full w-full">
             <RoomInfo roomUrl={roomUrl} />
+            <Button className="w-full" onClick={onStart}>
+              <Play />
+              Start Auction
+            </Button>
           </div>
 
-          <div className="flex-[2]">
+          <div className="flex-2">
             <AdminSettings
               defaultBid={settings.defaultBid}
               teamsMode={settings.teamsMode}

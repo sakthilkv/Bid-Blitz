@@ -42,6 +42,10 @@ export default function RoomPage() {
       setMessages((prev) => [...prev, message.messageData]);
     });
 
+    socket.on('UPDATE_SETTINGS', (payload) => {
+      setSettings(payload.settings);
+    });
+
     return () => {
       socket.disconnect();
     };
@@ -57,12 +61,27 @@ export default function RoomPage() {
   }, []);
 
   useEffect(() => {
-    if (socketRef.current && userName && playerId && roomId) {
-      socketRef.current.emit('ACTION', {
-        type: 'JOIN_ROOM',
-        payload: { roomId, name: userName, uid: playerId },
-      });
-    }
+    if (!socketRef.current || !userName || !playerId || !roomId) return;
+
+    socketRef.current.emit('ACTION', {
+      type: 'JOIN_ROOM',
+      payload: { roomId, name: userName, uid: playerId },
+    });
+
+    const raw = localStorage.getItem('auction_admin');
+    if (!raw) return;
+
+    const adminData = JSON.parse(raw);
+    if (adminData.roomId !== roomId) return;
+
+    socketRef.current.emit('ACTION', {
+      type: 'CLAIM_ADMIN',
+      payload: {
+        roomId,
+        adminKey: adminData.adminKey,
+        playerId,
+      },
+    });
   }, [userName, playerId, roomId]);
 
   const handleJoin = (name: string) => {
@@ -89,6 +108,21 @@ export default function RoomPage() {
     });
   };
 
+  function startAuction() {
+    if (!socketRef.current || !roomId) return;
+
+    const raw = localStorage.getItem('auction_admin');
+    if (!raw) return;
+
+    const payload = JSON.parse(raw);
+    if (!payload || payload.roomId !== roomId) return;
+
+    socketRef.current.emit('ACTION', {
+      type: 'START_AUCTION',
+      payload,
+    });
+  }
+
   if (!userName) {
     return <JoinAuctionDialog onJoin={handleJoin} triggerButton={false} />;
   }
@@ -105,11 +139,12 @@ export default function RoomPage() {
         setSettings(newSettings);
         if (socketRef.current && roomId) {
           socketRef.current.emit('ACTION', {
-            type: 'UPDATE_SETTINGS',
+            type: 'CHANGE_SETTINGS',
             payload: { roomId, ...newSettings },
           });
         }
       }}
+      onStart={startAuction}
     />
   );
 }

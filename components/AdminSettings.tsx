@@ -45,7 +45,19 @@ export function AdminSettings({
   const [time, setTime] = React.useState(timePerPlayer);
 
   React.useEffect(() => {
-    onChange?.({ defaultBid: bid, teamsMode: mode, totalPurse: purse, timePerPlayer: time });
+    setBid(defaultBid);
+    setMode(teamsMode);
+    setPurse(totalPurse);
+    setTime(timePerPlayer);
+  }, [defaultBid, teamsMode, totalPurse, timePerPlayer]);
+
+  React.useEffect(() => {
+    onChange?.({
+      defaultBid: bid,
+      teamsMode: mode,
+      totalPurse: purse,
+      timePerPlayer: time,
+    });
   }, [bid, mode, purse, time]);
 
   return (
