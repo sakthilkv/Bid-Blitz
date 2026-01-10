@@ -120,6 +120,39 @@ export default function RoomPage() {
       },
     });
   };
+  function handleTeamBid(bid: number) {
+    if (!socketRef.current || !roomId || !player) return;
+
+    socketRef.current.emit('ACTION', {
+      type: 'TEAM_BID_PLACED',
+      payload: {
+        roomId,
+        playerId: player.uid,
+        bid,
+      },
+    });
+  }
+
+  function getTeamsArray(
+    teamObj: Record<
+      string,
+      {
+        name: string;
+        basePrice: number;
+        soldTo: string | null;
+        soldPrice: number | null;
+      }
+    >,
+  ): Teams[] {
+    return Object.entries(teamObj).map(([id, team]) => ({
+      id,
+      name: team.name,
+      status: team.soldTo ? 'sold' : 'available',
+      price: team.soldPrice ?? team.basePrice,
+      owner: team.soldTo ? roomState?.players[team.soldTo]?.name : undefined,
+      avatar: team.soldTo ? roomState?.players[team.soldTo]?.avatar : undefined,
+    }));
+  }
 
   function startAuction() {
     if (!socketRef.current || !roomId) return;
@@ -166,6 +199,7 @@ export default function RoomPage() {
   if (phase === 2 && roomState && player) {
     const serverPlayer = roomState.players[player.uid];
     if (!serverPlayer) return null;
+    const teamsArray = getTeamsArray(roomState.teamAuction.teams);
     console.log(roomState.teamAuction.teams[roomState.teamAuction.currentTeamId].name);
     return (
       <TeamAuction
@@ -179,7 +213,6 @@ export default function RoomPage() {
         }}
         onSendMessage={handleSendMessage}
         messages={messages}
-        teams={[]}
         currentTeam={{
           teamName: roomState.teamAuction.teams[roomState.teamAuction.currentTeamId].name,
           timeLeft: roomState.timer.currentTime,
@@ -187,9 +220,8 @@ export default function RoomPage() {
           status: 'bidding',
           round: undefined,
         }}
-        onSendBid={function (bid: number): void {
-          throw new Error('Function not implemented.');
-        }}
+        onSendBid={handleTeamBid}
+        teams={teamsArray}
       />
     );
   }

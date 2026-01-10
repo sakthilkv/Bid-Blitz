@@ -3,11 +3,13 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const crypto = require('crypto');
+const util = require('util');
+
 const { baseTeams, extraTeams } = require('./data');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: 'http://localhost:3000' },
+  cors: { origin: 'https://vljb8mcl-3000.inc1.devtunnels.ms' },
 });
 
 app.use(cors());
@@ -123,6 +125,9 @@ io.on('connection', (socket) => {
       if (!room) return;
       console.log({ settings });
       room.settings = settings;
+      Object.values(room.players).forEach((player) => {
+        player.wallet = room.settings.totalPurse;
+      });
       io.to(roomId).emit('UPDATE_SETTINGS', { settings });
     }
 
@@ -131,57 +136,97 @@ io.on('connection', (socket) => {
       const room = rooms.get(roomId);
       if (!room) return;
 
-      if (roomLock.get(roomId) === adminData.adminKey) {
-        console.log('Room Unlocked');
-        room.phase = 2;
+      if (roomLock.get(roomId) !== adminData.adminKey) return;
 
-        // Initialize teams based on mode
-        const mode = room.settings.teamsMode;
-        if (mode === '10') {
-          room.teamAuction.teams = Object.fromEntries(Object.entries(baseTeams).slice(0, 10));
-        } else if (mode === '14') {
-          room.teamAuction.teams = { ...baseTeams, ...extraTeams };
-        }
+      console.log('Room Unlocked');
+      room.phase = 2;
+      const mode = room.settings.teamsMode;
+      const clone = (obj) => JSON.parse(JSON.stringify(obj));
+      if (mode === '10') {
+        room.teamAuction.teams = Object.fromEntries(Object.entries(clone(baseTeams)).slice(0, 10));
+      } else if (mode === '14') {
+        room.teamAuction.teams = {
+          ...clone(baseTeams),
+          ...clone(extraTeams),
+        };
+      }
 
-        // Prepare for auction
-        const teamIds = Object.keys(room.teamAuction.teams);
-        let currentTeamIndex = 0;
-        room.teamAuction.currentTeamId = teamIds[currentTeamIndex];
-        room.timer.currentTime = room.settings.timePerPlayer;
-        room.timer.isActive = true;
+      const teamIds = Object.keys(room.teamAuction.teams);
+      let currentTeamIndex = 0;
+      room.teamAuction.currentTeamId = teamIds[currentTeamIndex];
+      room.teamAuction.highestBid = 0;
+      room.teamAuction.highestBidderId = '';
+      room.timer.currentTime = room.settings.timePerPlayer;
+      room.timer.isActive = true;
+
+      io.to(roomId).emit('STATE', room);
+
+      console.log(util.inspect(rooms, { depth: null }));
+      const auctionInterval = setInterval(() => {
+        room.timer.currentTime -= 1;
 
         io.to(roomId).emit('STATE', room);
 
-        // Start interval for silent auction
-        const auctionInterval = setInterval(() => {
-          // Decrease timer
-          room.timer.currentTime -= 1;
+        if (room.timer.currentTime <= 0) {
+          const currentTeamId = room.teamAuction.currentTeamId;
+          const winningBidderId = room.teamAuction.highestBidderId;
+          const winningBid = room.teamAuction.highestBid;
 
-          // Emit updated state every second
-          io.to(roomId).emit('STATE', room);
+          if (winningBidderId && room.players[winningBidderId]) {
+            const winner = room.players[winningBidderId];
+            winner.wallet -= winningBid;
 
-          // Timer ended
-          if (room.timer.currentTime <= 0) {
-            // Reset highest bid info
-            room.teamAuction.highestBid = 0;
-            room.teamAuction.highestBidderId = '';
-
-            // Move to next team
-            currentTeamIndex += 1;
-            if (currentTeamIndex < teamIds.length) {
-              room.teamAuction.currentTeamId = teamIds[currentTeamIndex];
-              room.timer.currentTime = room.settings.timePerPlayer;
-            } else {
-              // All teams done, stop auction
-              clearInterval(auctionInterval);
-              room.timer.isActive = false;
-              console.log('Team auction ended');
-            }
+            room.teamAuction.teams[currentTeamId].soldTo = winner.uid;
+            room.teamAuction.teams[currentTeamId].soldPrice = winningBid;
+            room.players[winner.uid].team.name = room.teamAuction.teams[currentTeamId].name;
+            room.players[winner.uid].team.price = room.teamAuction.teams[currentTeamId].soldPrice;
           }
-        }, 1000); // every second
-      }
 
-      io.to(roomId).emit('STATE', room);
+          room.teamAuction.highestBid = 0;
+          room.teamAuction.highestBidderId = '';
+
+          currentTeamIndex += 1;
+          if (currentTeamIndex < teamIds.length) {
+            room.teamAuction.currentTeamId = teamIds[currentTeamIndex];
+            room.timer.currentTime = room.settings.timePerPlayer;
+          } else {
+            clearInterval(auctionInterval);
+            room.timer.isActive = false;
+            console.log('Team auction ended');
+          }
+          io.to(roomId).emit('STATE', room);
+        }
+      }, 1000);
+    }
+
+    if (type === 'TEAM_BID_PLACED') {
+      const { roomId, playerId, bid } = payload;
+      const room = rooms.get(roomId);
+      if (!room) return;
+
+      const player = room.players[playerId];
+      if (!player) return;
+
+      if (room.players[playerId].team.name !== '') return;
+
+      if (bid > player.wallet) return;
+
+      if (bid > room.teamAuction.highestBid) {
+        room.teamAuction.highestBid = bid;
+        room.teamAuction.highestBidderId = playerId;
+      }
+      const messageData = {
+        uid: player.uid,
+        user: player.name,
+        avatar: player.avatar,
+        message: `${player.name} secretly placed bid on ${room.teamAuction.currentTeamId}`,
+        timestamp: new Date().toLocaleTimeString(),
+        isSystem: true,
+      };
+
+      console.log({ messageData });
+
+      io.to(roomId).emit('RECEIVE_MESSAGE', { messageData });
     }
   });
 

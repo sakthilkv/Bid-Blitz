@@ -56,18 +56,18 @@ type UserInfoCardProps = {
 
 type TeamStatus = 'available' | 'sold';
 
-type Team = {
+type Teams = {
   id: string;
   name: string;
   logo?: string;
   status: TeamStatus;
   price?: number;
-  boughtBy?: string;
+  owner?: string;
   avatar?: string;
 };
 
 type TeamsTableProps = {
-  teams: Team[];
+  teams: Teams[];
 };
 
 type TeamAuctionHeaderProps = {
@@ -82,7 +82,7 @@ type TeamAuctionProps = {
   phase: number;
   playerID: string;
   userInfo: UserInfoCardProps;
-  teams: Team[];
+  teams: Teams[];
   currentTeam: TeamAuctionHeaderProps;
   messages: ChatMessage[];
   onSendMessage: (text: string) => void;

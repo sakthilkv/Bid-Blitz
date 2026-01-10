@@ -9,22 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, XCircle, IndianRupee, User } from 'lucide-react';
 
-type TeamStatus = 'available' | 'sold';
-
-type Team = {
-  id: string;
-  name: string;
-  logo?: string;
-  status: TeamStatus;
-  price?: number;
-  boughtBy?: string;
-};
-
-type Props = {
-  teams: Team[];
-};
-
-export function TeamsTable({ teams }: Props) {
+export function TeamsTable({ teams }: TeamsTableProps) {
   return (
     <div className="rounded-lg border bg-card">
       <Table className="table-fixed">
@@ -80,8 +65,8 @@ export function TeamsTable({ teams }: Props) {
               <TableCell>
                 {team.status === 'sold' ? (
                   <div className="flex items-center gap-2 min-w-0">
-                    <User className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{team.boughtBy}</span>
+                    
+                    <span className="truncate">{team.avatar}{" "}{team.owner}</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-muted-foreground">

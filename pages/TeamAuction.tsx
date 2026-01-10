@@ -23,7 +23,7 @@ export default function TeamAuction({
   return (
     <div className="flex h-full min-h-screen gap-4 p-20">
       <div className="flex flex-col flex-1 gap-4 min-h-0">
-        <TeamsTable teams={[]} />
+        <TeamsTable teams={teams} />
       </div>
 
       <div className="flex flex-col flex-2 gap-4 min-h-0">
