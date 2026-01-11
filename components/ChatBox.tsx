@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -48,8 +48,11 @@ export function ChatBox({ messages, onSend, currentUserId }: ChatBoxProps) {
                   className={cn('flex gap-2', isMe ? 'justify-end' : 'justify-start')}
                 >
                   {!isMe && (
-                    <Avatar>
-                      <AvatarFallback className="text-xl">{m.avatar}</AvatarFallback>
+                    <Avatar className="h-10 w-10 bg-muted pb-1">
+                      <AvatarImage src={`/avatars/${m.avatar}`} className="object-contain" />
+                      <AvatarFallback className="text-xl">
+                        {m.avatar?.[0]?.toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                   )}
 

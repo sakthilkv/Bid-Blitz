@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, XCircle, IndianRupee, User } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export function TeamsTable({ teams }: TeamsTableProps) {
   return (
@@ -65,8 +66,7 @@ export function TeamsTable({ teams }: TeamsTableProps) {
               <TableCell>
                 {team.status === 'sold' ? (
                   <div className="flex items-center gap-2 min-w-0">
-                    
-                    <span className="truncate">{team.avatar}{" "}{team.owner}</span>
+                    <span className="truncate flex flex-row items-center gap-1">{team.owner}</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-muted-foreground">

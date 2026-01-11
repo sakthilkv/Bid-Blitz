@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export function ParticipantsList({ participants }: ParticipantsListProps) {
   return (
@@ -16,8 +16,11 @@ export function ParticipantsList({ participants }: ParticipantsListProps) {
             {participants.map((p) => (
               <div key={p.uid} className="flex items-center justify-between rounded-lg border p-3">
                 <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarFallback className="text-xl">{p.avatar}</AvatarFallback>
+                  <Avatar className="h-10 w-10 bg-muted pb-1">
+                    <AvatarImage src={`/avatars/${p.avatar}`} className="object-contain" />
+                    <AvatarFallback className="text-xl">
+                      {p.avatar?.[0]?.toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
 
                   <div className="flex flex-col">

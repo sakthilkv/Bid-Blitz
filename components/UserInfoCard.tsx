@@ -7,8 +7,9 @@ export function UserInfoCard({ name, avatar, wallet }: UserInfoCardProps) {
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center gap-3">
-        <Avatar>
-          <AvatarFallback>{avatar}</AvatarFallback>
+        <Avatar className="h-10 w-10 bg-muted pb-1">
+          <AvatarImage src={`/avatars/${avatar}`} className="object-contain" />
+          <AvatarFallback className="text-xl">{avatar?.[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
         <CardTitle>{name}</CardTitle>
       </CardHeader>
