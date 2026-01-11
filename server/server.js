@@ -9,7 +9,7 @@ const { baseTeams, extraTeams } = require('./data');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: 'https://vljb8mcl-3000.inc1.devtunnels.ms' },
+  cors: { origin: 'http://localhost:3000' },
 });
 
 app.use(cors());

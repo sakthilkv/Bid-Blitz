@@ -78,7 +78,18 @@ export function AdminSettings({
               <IndianRupee className="h-4 w-4" />
               Default Bid Amount
             </Label>
-            <Input type="number" value={bid} onChange={(e) => setBid(Number(e.target.value))} />
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              onKeyDown={(e) => {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') {
+                  e.preventDefault();
+                }
+              }}
+              value={bid}
+              onChange={(e) => setBid(Number(e.target.value))}
+            />
           </div>
 
           <div className="space-y-2 w-full">
@@ -86,7 +97,18 @@ export function AdminSettings({
               <IndianRupee className="h-4 w-4" />
               Total Purse Per Team
             </Label>
-            <Input type="number" value={purse} onChange={(e) => setPurse(Number(e.target.value))} />
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              onKeyDown={(e) => {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') {
+                  e.preventDefault();
+                }
+              }}
+              value={purse}
+              onChange={(e) => setPurse(Number(e.target.value))}
+            />
           </div>
 
           <div className="space-y-2 w-full">
@@ -94,7 +116,18 @@ export function AdminSettings({
               <Clock className="h-4 w-4" />
               Bid Time (s)
             </Label>
-            <Input type="number" value={time} onChange={(e) => setTime(Number(e.target.value))} />
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              onKeyDown={(e) => {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') {
+                  e.preventDefault();
+                }
+              }}
+              value={time}
+              onChange={(e) => setTime(Number(e.target.value))}
+            />
           </div>
         </div>
 

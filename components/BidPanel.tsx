@@ -26,7 +26,14 @@ export function BidPanel({ maxBid, onBidSubmit, onAuctionEnd }: Props) {
         <div className="flex items-center gap-2">
           <IndianRupee className="h-4 w-4" />
           <Input
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            onKeyDown={(e) => {
+              if (!/[0-9]/.test(e.key) && e.key !== 'Backspace') {
+                e.preventDefault();
+              }
+            }}
             placeholder={`Max ₹${maxBid}L`}
             value={bid}
             onChange={(e) => setBid(Number(e.target.value))}
