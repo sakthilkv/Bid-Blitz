@@ -58,7 +58,7 @@ app.post('/create-room', (req, res) => {
   res.json({ roomId, adminKey });
 });
 
-/* ---------- SOCKET ---------- */
+/* --------- SOCKET ---------- */
 
 io.on('connection', (socket) => {
   socket.on('ACTION', ({ type, payload }) => {
@@ -192,7 +192,7 @@ io.on('connection', (socket) => {
           } else {
             clearInterval(auctionInterval);
             room.timer.isActive = false;
-            console.log('Team auction ended');
+            room.phase = 3;
           }
           io.to(roomId).emit('STATE', room);
         }
