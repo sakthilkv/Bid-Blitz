@@ -7,6 +7,7 @@ import JoinAuctionDialog from '@/components/JoinAuctionDialog';
 import { generateUUID } from '@/utils/Utils';
 import { URL } from '@/utils/Constants';
 import TeamAuction from '@/pages/TeamAuction';
+import PlayerAuction from '@/pages/PlayerAuction';
 
 export default function RoomPage() {
   const [player, setPlayer] = useState<{
@@ -224,6 +225,11 @@ export default function RoomPage() {
         teams={teamsArray}
       />
     );
+  }
+
+  if (phase === 3 && roomState && player) {
+    <PlayerAuction/>
+
   }
 
   return null;

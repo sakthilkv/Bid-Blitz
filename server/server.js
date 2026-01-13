@@ -5,7 +5,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const util = require('util');
 
-const { baseTeams, extraTeams } = require('./data');
+const { baseTeams, extraTeams, playerPool } = require('./data');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -50,6 +50,13 @@ app.post('/create-room', (req, res) => {
       highestBid: 0,
       highestBidderId: '',
     },
+    playerAuction: {
+      playerPool: {},
+      currentPlayerId: null,
+      highestBid: 0,
+      highestBidderId: '',
+      curentSet: null,
+    },
   };
 
   rooms.set(roomId, state);
@@ -59,6 +66,7 @@ app.post('/create-room', (req, res) => {
 });
 
 /* --------- SOCKET ---------- */
+const clone = (obj) => JSON.parse(JSON.stringify(obj));
 
 io.on('connection', (socket) => {
   socket.on('ACTION', ({ type, payload }) => {
@@ -141,7 +149,7 @@ io.on('connection', (socket) => {
       console.log('Room Unlocked');
       room.phase = 2;
       const mode = room.settings.teamsMode;
-      const clone = (obj) => JSON.parse(JSON.stringify(obj));
+
       if (mode === '10') {
         room.teamAuction.teams = Object.fromEntries(Object.entries(clone(baseTeams)).slice(0, 10));
       } else if (mode === '14') {
@@ -192,7 +200,7 @@ io.on('connection', (socket) => {
           } else {
             clearInterval(auctionInterval);
             room.timer.isActive = false;
-            room.phase = 3;
+            io.to(roomId).emit('TEAM_AUCTION_OVER', { activePlayerAuction: true });
           }
           io.to(roomId).emit('STATE', room);
         }
@@ -227,6 +235,108 @@ io.on('connection', (socket) => {
       console.log({ messageData });
 
       io.to(roomId).emit('RECEIVE_MESSAGE', { messageData });
+    }
+
+    if (type === 'START_PLAYER_AUCTION') {
+      const { roomId, adminKey } = payload;
+      const room = rooms.get(roomId);
+      if (!room) return;
+      if (roomLock.get(roomId) !== adminKey) return;
+
+      room.phase = 3;
+
+      room.playerAuction.playerPool = clone(playerPool);
+
+      const sets = Object.keys(room.playerAuction.playerPool);
+      let currentSetIndex = 0;
+      let currentPlayerIndex = 0;
+
+      room.playerAuction.currentSet = sets[currentSetIndex];
+      let playerIds = Object.keys(room.playerAuction.playerPool[room.playerAuction.currentSet]);
+      room.playerAuction.currentPlayerId = playerIds[currentPlayerIndex];
+
+      room.playerAuction.highestBid = 0;
+      room.playerAuction.highestBidderId = '';
+      room.timer.currentTime = room.settings.timePerPlayer;
+      room.timer.isActive = true;
+
+      io.to(roomId).emit('STATE', room);
+
+      const auctionInterval = setInterval(() => {
+        room.timer.currentTime -= 1;
+        io.to(roomId).emit('STATE', room);
+
+        if (room.timer.currentTime <= 0) {
+          const set = room.playerAuction.currentSet;
+          const pid = room.playerAuction.currentPlayerId;
+          const winningBidderId = room.playerAuction.highestBidderId;
+          const winningBid = room.playerAuction.highestBid;
+
+          if (winningBidderId && room.players[winningBidderId]) {
+            const winner = room.players[winningBidderId];
+            winner.wallet -= winningBid;
+            room.playerAuction.playerPool[set][pid].soldTo = winner.uid;
+            room.playerAuction.playerPool[set][pid].soldPrice = winningBid;
+            room.players[winner.uid].purchased.push({
+              name: pid,
+              price: winningBid,
+              set,
+            });
+          }
+
+          room.playerAuction.highestBid = 0;
+          room.playerAuction.highestBidderId = '';
+
+          currentPlayerIndex += 1;
+
+          if (currentPlayerIndex >= playerIds.length) {
+            currentSetIndex += 1;
+            currentPlayerIndex = 0;
+
+            if (currentSetIndex >= sets.length) {
+              clearInterval(auctionInterval);
+              room.timer.isActive = false;
+              room.phase = 4;
+              io.to(roomId).emit('STATE', room);
+              return;
+            }
+
+            room.playerAuction.currentSet = sets[currentSetIndex];
+            playerIds = Object.keys(room.playerAuction.playerPool[room.playerAuction.currentSet]);
+          }
+
+          room.playerAuction.currentPlayerId = playerIds[currentPlayerIndex];
+          room.timer.currentTime = room.settings.timePerPlayer;
+          io.to(roomId).emit('STATE', room);
+        }
+      }, 1000);
+    }
+
+    if (type === 'PLAYER_BID_PLACED') {
+      const { roomId, playerId, bid } = payload;
+      const room = rooms.get(roomId);
+      if (!room) return;
+
+      const player = room.players[playerId];
+      if (!player) return;
+
+      if (bid > player.wallet) return;
+
+      if (bid > room.playerAuction.highestBid) {
+        room.playerAuction.highestBid = bid;
+        room.playerAuction.highestBidderId = playerId;
+
+        const messageData = {
+          uid: player.uid,
+          user: player.name,
+          avatar: player.avatar,
+          message: `${player.name} secretly placed bid`,
+          timestamp: new Date().toLocaleTimeString(),
+          isSystem: true,
+        };
+
+        io.to(roomId).emit('RECEIVE_MESSAGE', { messageData });
+      }
     }
   });
 

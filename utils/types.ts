@@ -1,4 +1,4 @@
-type PlayerStatus = 'joined' | 'ready';
+type ParticipantStatus = 'joined' | 'ready';
 
 type Participant = {
   name: string;
@@ -14,7 +14,7 @@ type Participant = {
   }[];
   wallet: number;
   isHost: boolean;
-  status: PlayerStatus;
+  status: ParticipantStatus;
 };
 
 type ParticipantsListProps = {
@@ -84,6 +84,45 @@ type TeamAuctionProps = {
   userInfo: UserInfoCardProps;
   teams: Teams[];
   currentTeam: TeamAuctionHeaderProps;
+  messages: ChatMessage[];
+  onSendMessage: (text: string) => void;
+  onSendBid: (bid: number) => void;
+};
+
+type PlayerStatus = 'sold' | 'unsold';
+type PlayerRole = 'batsman' | 'bowler' | 'allrounder';
+
+type Player = {
+  id: string;
+  name: string;
+  role: PlayerRole;
+  overseas?: boolean;
+  status: PlayerStatus;
+  price?: number;
+  team?: string;
+};
+
+type PlayersTableProps = {
+  players: Player[];
+};
+
+type PlayerAuctionHeader = {
+  playerName: string;
+  overseas: boolean;
+  currentBid: number;
+  currentBidder: string;
+  timeLeft: number;
+  totalTime?: number;
+  status?: 'bidding' | 'ended';
+  basePrice: number;
+};
+
+type PlayerAuctionProps = {
+  phase: number;
+  playerID: string;
+  userInfo: UserInfoCardProps;
+  players: Player[];
+  currentPlayer: any;
   messages: ChatMessage[];
   onSendMessage: (text: string) => void;
   onSendBid: (bid: number) => void;

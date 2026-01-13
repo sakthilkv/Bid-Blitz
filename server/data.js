@@ -88,4 +88,103 @@ const extraTeams = {
   },
 };
 
-module.exports = { baseTeams, extraTeams };
+const playerPool = {
+  batsmen: {
+    'VIRAT KOHLI': {
+      basePrice: 2000,
+      soldTo: null,
+      soldPrice: null,
+      overseas: false,
+    },
+    'ROHIT SHARMA': {
+      basePrice: 2000,
+      soldTo: null,
+      soldPrice: null,
+      overseas: false,
+    },
+    'BABAR AZAM': {
+      basePrice: 1500,
+      soldTo: null,
+      soldPrice: null,
+      overseas: true,
+    },
+    'DAVID WARNER': {
+      basePrice: 1500,
+      soldTo: null,
+      soldPrice: null,
+      overseas: true,
+    },
+    'SHUBMAN GILL': {
+      basePrice: 1200,
+      soldTo: null,
+      soldPrice: null,
+      overseas: false,
+    },
+  },
+  bowlers: {
+    'JASPRIT BUMRAH': {
+      basePrice: 2000,
+      soldTo: null,
+      soldPrice: null,
+      overseas: false,
+    },
+    'MOHAMMED SHAMI': {
+      basePrice: 1200,
+      soldTo: null,
+      soldPrice: null,
+      overseas: false,
+    },
+    'TRENT BOULT': {
+      basePrice: 1500,
+      soldTo: null,
+      soldPrice: null,
+      overseas: true,
+    },
+    'KAGISO RABADA': {
+      basePrice: 1500,
+      soldTo: null,
+      soldPrice: null,
+      overseas: true,
+    },
+    'RASHID KHAN': {
+      basePrice: 2000,
+      soldTo: null,
+      soldPrice: null,
+      overseas: true,
+    },
+  },
+  allrounders: {
+    'HARDIK PANDYA': {
+      basePrice: 2000,
+      soldTo: null,
+      soldPrice: null,
+      overseas: false,
+    },
+    'RAVINDRA JADEJA': {
+      basePrice: 2000,
+      soldTo: null,
+      soldPrice: null,
+      overseas: false,
+    },
+    'BEN STOKES': {
+      basePrice: 1800,
+      soldTo: null,
+      soldPrice: null,
+      overseas: true,
+    },
+    'GLENN MAXWELL': {
+      basePrice: 1600,
+      soldTo: null,
+      soldPrice: null,
+      overseas: true,
+    },
+    'SUNIL NARINE': {
+      basePrice: 1500,
+      soldTo: null,
+      soldPrice: null,
+      overseas: true,
+    },
+  },
+};
+
+module.exports = { baseTeams, extraTeams, playerPool };
