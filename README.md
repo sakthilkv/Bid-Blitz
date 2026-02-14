@@ -1,7 +1,6 @@
-# Online IPL Auction Game
+# Bid-Blitz
 
-A real-time, web-based IPL-style auction platform that simulates competitive bidding for teams and players.
-Built using Next.js for the frontend and Node.js (JavaScript) for the backend, powered by WebSockets for real-time communication.
+A real-time multiplayer IPL auction game where teams bid on players, featuring chat, participant management, and customizable admin settings.
 
 ## Overview
 
