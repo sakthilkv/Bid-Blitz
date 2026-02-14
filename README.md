@@ -3,8 +3,6 @@
 A real-time, web-based IPL-style auction platform that simulates competitive bidding for teams and players.
 Built using Next.js for the frontend and Node.js (JavaScript) for the backend, powered by WebSockets for real-time communication.
 
----
-
 ## Overview
 
 This project recreates the IPL auction experience in an interactive online environment where multiple users can join, bid, and compete in real time.
@@ -40,8 +38,6 @@ The system currently supports:
   - Auction state synchronization
   - Multi-user interaction
 
----
-
 ## Features
 
 ### 1. Lobby
@@ -64,8 +60,6 @@ Users can bid on complete teams in a live auction environment.
 
 ![Team Auction Page](./docs/images/team-auction.png)
 
----
-
 ### 3. Player Auction
 
 Individual player bidding with dynamic competitive interaction.
@@ -75,8 +69,6 @@ Individual player bidding with dynamic competitive interaction.
 - Final allocation after timer ends
 
 ![Player Auction Page](./docs/images/player-auction.png)
-
----
 
 ## Real-Time Architecture
 
@@ -94,8 +86,6 @@ This ensures:
 - Low latency updates
 - Fully synchronized auction state
 
----
-
 ## Visual Assets Disclaimer
 
 Some player profile images use characters inspired by Don't Starve Together as display pictures (PFPs).
@@ -104,8 +94,6 @@ Some player profile images use characters inspired by Don't Starve Together as d
 
 These images are used strictly for non-commercial, educational, and demonstration purposes. All character rights belong to their respective creators and owners.
 
----
-
 ## Future Improvements
 
 - User authentication and role-based bidding
@@ -113,8 +101,6 @@ These images are used strictly for non-commercial, educational, and demonstratio
 - Auction history and analytics
 - Persistent database integration
 - Production-ready deployment setup
-
----
 
 ## Conclusion
 
