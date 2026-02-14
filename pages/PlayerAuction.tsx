@@ -68,7 +68,7 @@ export default function PlayerAuction() {
       <div className="flex flex-col flex-2 gap-4 min-h-0">
         <div className="flex w-full gap-4">
           <div className="w-1/3">
-            <UserInfoCard name="Sakthi" pfp="/avatar.png" wallet={100} />
+            <UserInfoCard name="Sakthi" avatar="winona.png" wallet={12446} playerId={''} />
           </div>
 
           <div className="flex-1">
